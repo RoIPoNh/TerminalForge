@@ -4,9 +4,6 @@
 #include <fstream>
 #include <cstdlib>
 
-// ==========================================
-//  Класс Account (все поля публичные)
-// ==========================================
 class Account {
 public:
     std::string name;
@@ -14,14 +11,8 @@ public:
     std::string password;
 };
 
-// ==========================================
-//  Глобальный вектор
-// ==========================================
 std::vector<Account> accounts;
 
-// ==========================================
-//  Сохранение и загрузка
-// ==========================================
 void saveToFile() {
     std::string path = std::string(getenv("HOME")) + "/.forge/accounts.txt";
     std::ofstream file(path);
@@ -45,9 +36,6 @@ void loadFromFile() {
     }
 }
 
-// ==========================================
-//  Команды
-// ==========================================
 void addAccount() {
     Account acc;
     std::cout << "Enter service name (e.g., Google): ";
@@ -94,9 +82,23 @@ void getAccount() {
     std::cout << "❌ No account found with name: " << name << "\n";
 }
 
-// ==========================================
-//  Главная функция
-// ==========================================
+void removeAccount() {
+    std::string name;
+    std::cout << "Enter service name to remove: ";
+    std::cin >> name;
+
+    for (size_t i = 0; i < accounts.size(); ++i) {
+        if (accounts[i].name == name) {
+            accounts.erase(accounts.begin() + i);
+            saveToFile();
+            std::cout << "✅ Account \"" << name << "\" removed.\n";
+            return;
+        }
+    }
+
+    std::cout << "❌ No account found with name: " << name << "\n";
+}
+
 int main(int argc, char* argv[]) {
     loadFromFile();
 
@@ -111,16 +113,19 @@ int main(int argc, char* argv[]) {
 
     if (command == "--help") {
         std::cout << "Available commands:\n";
-        std::cout << "  add   - Add a new account\n";
-        std::cout << "  list  - Show all accounts\n";
-        std::cout << "  get   - Show full account by name\n";
-        std::cout << "  --help- Show this help\n";
+        std::cout << "  add    - Add a new account\n";
+        std::cout << "  list   - Show all accounts\n";
+        std::cout << "  get    - Show full account by name\n";
+        std::cout << "  remove - Remove account by name\n";
+        std::cout << "  --help - Show this help\n";
     } else if (command == "add") {
         addAccount();
     } else if (command == "list") {
         listAccounts();
     } else if (command == "get") {
         getAccount();
+    } else if (command == "remove") {
+        removeAccount();
     } else {
         std::cout << "Unknown command. Try 'forge --help'.\n";
     }
