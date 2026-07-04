@@ -4,6 +4,32 @@
 #include <fstream>
 #include <cstdlib>
 
+const int SHIFT = 3;
+
+std::string encrypt(const std::string& text) {
+    std::string result = text;
+    for (char& ch : result) {
+        if (ch >= 'a' && ch <= 'z') {
+            ch = (ch - 'a' + SHIFT) % 26 + 'a';
+        } else if (ch >= 'A' && ch <= 'Z') {
+            ch = (ch - 'A' + SHIFT) % 26 + 'A';
+        }
+    }
+    return result;
+}
+
+std::string decrypt(const std::string& text) {
+    std::string result = text;
+    for (char& ch : result) {
+        if (ch >= 'a' && ch <= 'z') {
+            ch = (ch - 'a' - SHIFT + 26) % 26 + 'a';
+        } else if (ch >= 'A' && ch <= 'Z') {
+            ch = (ch - 'A' - SHIFT + 26) % 26 + 'A';
+        }
+    }
+    return result;
+}
+
 class Account {
 public:
     std::string name;
@@ -19,7 +45,7 @@ void saveToFile() {
     for (const auto& acc : accounts) {
         file << acc.name << "\n";
         file << acc.login << "\n";
-        file << acc.password << "\n";
+        file << encrypt(acc.password) << "\n";
     }
 }
 
@@ -29,16 +55,17 @@ void loadFromFile() {
     if (!file) return;
 
     Account acc;
-    while (std::getline(file, acc.name) && 
-           std::getline(file, acc.login) && 
+    while (std::getline(file, acc.name) &&
+           std::getline(file, acc.login) &&
            std::getline(file, acc.password)) {
+        acc.password = decrypt(acc.password);
         accounts.push_back(acc);
     }
 }
 
 void addAccount() {
     Account acc;
-    std::cout << "Enter service name (e.g., Google): ";
+    std::cout << "Enter service name: ";
     std::cin >> acc.name;
     std::cout << "Enter login: ";
     std::cin >> acc.login;
@@ -47,7 +74,7 @@ void addAccount() {
 
     accounts.push_back(acc);
     saveToFile();
-    std::cout << "✅ Account added and saved!\n";
+    std::cout << "Account added and saved.\n";
 }
 
 void listAccounts() {
@@ -58,8 +85,8 @@ void listAccounts() {
 
     std::cout << "\n--- Your accounts ---\n";
     for (size_t i = 0; i < accounts.size(); ++i) {
-        std::cout << i + 1 << ". " 
-                  << accounts[i].name 
+        std::cout << i + 1 << ". "
+                  << accounts[i].name
                   << " (login: " << accounts[i].login << ")\n";
     }
     std::cout << "----------------------\n";
@@ -72,14 +99,14 @@ void getAccount() {
 
     for (const auto& acc : accounts) {
         if (acc.name == name) {
-            std::cout << "\n✅ Found:\n";
+            std::cout << "\nFound:\n";
             std::cout << "  Service: " << acc.name << "\n";
             std::cout << "  Login:   " << acc.login << "\n";
             std::cout << "  Password: " << acc.password << "\n";
             return;
         }
     }
-    std::cout << "❌ No account found with name: " << name << "\n";
+    std::cout << "No account found with name: " << name << "\n";
 }
 
 void removeAccount() {
@@ -91,19 +118,18 @@ void removeAccount() {
         if (accounts[i].name == name) {
             accounts.erase(accounts.begin() + i);
             saveToFile();
-            std::cout << "✅ Account \"" << name << "\" removed.\n";
+            std::cout << "Account \"" << name << "\" removed.\n";
             return;
         }
     }
-
-    std::cout << "❌ No account found with name: " << name << "\n";
+    std::cout << "No account found with name: " << name << "\n";
 }
 
 int main(int argc, char* argv[]) {
     loadFromFile();
 
     if (argc < 2) {
-        std::cout << "Terminal Forge v0.3\n";
+        std::cout << "Terminal Forge v0.5\n";
         std::cout << "Usage: forge <command>\n";
         std::cout << "Try 'forge --help' for more info.\n";
         return 0;
