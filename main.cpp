@@ -125,6 +125,26 @@ void removeAccount() {
     std::cout << "No account found with name: " << name << "\n";
 }
 
+void exportToCSV() {
+    std::string path = std::string(getenv("HOME")) + "/.forge/export.csv";
+    std::ofstream file(path);
+
+    if (!file) {
+        std::cout << "Error: cannot create export file.\n";
+        return;
+    }
+
+    file << "name,login,password\n";
+
+    for (const auto& acc : accounts) {
+        file << acc.name << ","
+             << acc.login << ","
+             << acc.password << "\n";
+    }
+
+    std::cout << "Exported " << accounts.size() << " accounts to " << path << "\n";
+}
+
 int main(int argc, char* argv[]) {
     loadFromFile();
 
@@ -144,6 +164,7 @@ int main(int argc, char* argv[]) {
         std::cout << "  get    - Show full account by name\n";
         std::cout << "  remove - Remove account by name\n";
         std::cout << "  --help - Show this help\n";
+        std::cout << "  export - Export all accounts to CSV file\n";
     } else if (command == "add") {
         addAccount();
     } else if (command == "list") {
@@ -152,6 +173,8 @@ int main(int argc, char* argv[]) {
         getAccount();
     } else if (command == "remove") {
         removeAccount();
+    } else if (command == "export") {
+        exportToCSV();
     } else {
         std::cout << "Unknown command. Try 'forge --help'.\n";
     }
